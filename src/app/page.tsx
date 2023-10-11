@@ -1,4 +1,6 @@
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react"
 
 export default function Home() {
   return (
@@ -8,6 +10,20 @@ export default function Home() {
       backdrop-blur transition-all hover:border-gray-300 hover:bg-white/50">
         <p className="text-sm font-semibold text-gray-700"> Level Saving!</p>
       </div>
+      <h1 className="max-w-4xl text-5xl font-bold md:text-6xl lg:text-7xl">
+        Chat with your personal <span className="text-blue-600">MoneyBot</span> in seconds.
+      </h1>
+      <p className="mt-5 max-w-prose text-zinc-700 sm:text-lg">
+        MoneyBot allows you to save money in a fun and easy way.
+        It is a chatbot that helps you save money by sending you weekly motivation regarding your goal.
+        Set up a savings goal and the MoneyBot will help you reach it!
+      </p>
+
+      <Link href="/dashboard" target="_blank">
+        Get started <ArrowRight className="ml-2 h-5 w-5" />
+      </Link>
+
+
     </MaxWidthWrapper>
   )
 }
