@@ -8,6 +8,7 @@ import { trpc } from "@/app/_trpc/client";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import GenericDialog from "./GenericDialog";
+import Link from 'next/link';
 
 interface GoalRendererProps {
     goalData: {
@@ -117,6 +118,12 @@ const GoalRenderer: React.FC<GoalRendererProps> = ({ goalData }) => {
 
     return (
         <main className="mx-auto max-w-7xl md:p-10">
+            {/* Sjekk sikkerheten til linken. Kan den nås av feil person? */}
+            <Link
+                href='/dashboard'
+                className='flex z-40 font-semibold'>
+                <span>Dashboard</span>
+            </Link>
             <div className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0">
                 <h1 className="mb-3 font-bold text-5xl text-gray-900">{goal.name}</h1>
             </div>
