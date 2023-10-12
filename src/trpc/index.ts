@@ -99,7 +99,25 @@ export const appRouter = router({
         })).mutation(async ({ ctx, input }) => {
             const { userId } = ctx;
 
-            const goal = await db.savingGoal.update({
+            // Fetch the current state of the goal
+            const currentGoal = await db.savingGoal.findUnique({
+                where: {
+                    id: input.id,
+                    userId,
+                },
+            });
+
+            if (!currentGoal) {
+                throw new TRPCError({ code: 'NOT_FOUND' });
+            }
+
+            // Ensure the withdrawal amount doesn't exceed the currentAmount
+            if (currentGoal.currentAmount + input.amount < 0) {
+                throw new TRPCError({ code: 'BAD_REQUEST', message: 'Withdrawal amount exceeds the current balance.' });
+            }
+
+            // Update the goal
+            const updatedGoal = await db.savingGoal.update({
                 where: {
                     id: input.id,
                     userId,
@@ -111,12 +129,9 @@ export const appRouter = router({
                 },
             });
 
-            if (!goal) {
-                throw new TRPCError({ code: 'NOT_FOUND' });
-            }
-
-            return goal;
+            return updatedGoal;
         }),
+
 
 });
 

@@ -22,7 +22,12 @@ const Progress = React.forwardRef<
   max = 100, // Default max to 100 if not provided
   ...props
 }, ref) => {
-  const percentageValue = (value || 0) / max * 100;
+  let percentageValue = (value || 0) / max * 100;
+
+  // Ensure the percentage does not exceed 100%
+  if (percentageValue > 100) {
+    percentageValue = 100;
+  }
 
   return (
     <ProgressPrimitive.Root
@@ -44,6 +49,7 @@ const Progress = React.forwardRef<
     </ProgressPrimitive.Root>
   );
 });
+
 
 
 export { Progress }

@@ -13,19 +13,10 @@ datasource db {
 
 model User {
   //Dont use @id @default(autoincrement()) since its coming from the auth provider Kinde
-  id               String  @id @unique
-  email            String  @unique
+  id         String       @id @unique
+  email      String       @unique
   //------------------------------
-  stripeCustomerId String? @unique @map(name: "stripe_customer_id")
-
   SavingGoal SavingGoal[]
-  // id               Int          @id @default(autoincrement())
-  // firstName        String
-  // lastName         String
-  // validated        Boolean
-  // createdAt        DateTime     @default(now())
-  // updatedAt        DateTime     @updatedAt
-  // savinggoal       Savinggoal[]
 }
 
 enum AddGoalStatus {

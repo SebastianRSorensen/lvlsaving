@@ -12,14 +12,6 @@ const AddGoalButton = () => {
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
-    // const router = useRouter()
-
-    // const [isUploading, setIsUploading] =
-    //     useState<boolean>(false)
-    // const [uploadProgress, setUploadProgress] =
-    //     useState<number>(0)
-    // //   const { toast } = useToast()
-
     return (
 
         <Dialog open={isOpen} onOpenChange={(v) => {
@@ -30,8 +22,6 @@ const AddGoalButton = () => {
             </DialogTrigger>
 
             <DialogContent>
-                {/* TODO: Add input in form */}
-                <Form />
                 <h1>Content</h1>
             </DialogContent>
         </Dialog>
