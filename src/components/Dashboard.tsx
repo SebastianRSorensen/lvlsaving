@@ -10,9 +10,16 @@ import { Button } from "./ui/button"
 
 const Dashboard = () => {
 
+    // Force refresh data
+    const utils = trpc.useContext()
+
     // client side data fetching
     const { data: goals, isLoading } = trpc.getUserGoals.useQuery()
-    const { mutate: deletUserGoal } = trpc.deleteUserGoal.useMutation()
+    const { mutate: deletUserGoal } = trpc.deleteUserGoal.useMutation({
+        onSuccess: () => {
+            utils.getUserGoals.invalidate()
+        }
+    })
 
     return (
         <main className="mx-auto max-w-7xl md:p-10">
@@ -53,7 +60,6 @@ const Dashboard = () => {
                                         deletUserGoal({ id: goal.id })}
                                     className="w-full" variant="destructive" size="sm">
                                     <Trash className="h-4 w-4" />
-
                                 </Button>
                             </div>
                         </li>
