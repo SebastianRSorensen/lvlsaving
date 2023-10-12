@@ -37,7 +37,12 @@ const GoalRenderer: React.FC<GoalRendererProps> = ({ goalData }) => {
 
         return (
             <GenericDialog
-                trigger={<Button>{actionLabel}</Button>}
+                trigger={
+                    actionLabel === "Deposit" ?
+                        (<Button>{actionLabel}</Button>) :
+                        (<Button variant="destructive" size="sm">{actionLabel}</Button>)
+                }
+
                 content={(
                     <>
                         <Input
@@ -46,7 +51,10 @@ const GoalRenderer: React.FC<GoalRendererProps> = ({ goalData }) => {
                             onChange={(e: { target: { value: any; }; }) => setAmount(Number(e.target.value))}
                             placeholder="Enter amount"
                         />
-                        <Button onClick={() => handleTransfer(action)} disabled={transferMutation.isLoading}>
+                        <Button onClick={() => handleTransfer(action)}
+                            variant={actionLabel === "Deposit" ? undefined : "destructive"}
+                            disabled={transferMutation.isLoading}
+                        >
                             {transferMutation.isLoading
                                 ? <Loader2 className="h-4 w-4 animate-spin" />
                                 : actionLabel
