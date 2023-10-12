@@ -2,23 +2,34 @@
 
 import { trpc } from "@/app/_trpc/client"
 import AddGoalButton from "./AddGoalButton"
-import { Ghost, MessageSquare, Plus, Trash } from "lucide-react"
+import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react"
 import Skeleton from "react-loading-skeleton"
 import Link from "next/link"
 import { format } from "date-fns"
 import { Button } from "./ui/button"
+import { useState } from "react"
 
 const Dashboard = () => {
+    // To show loading state on specific goal
+    const [currentlyDeletingGoal, setCurrentlyDeletingGoal] = useState<string | null>(null)
 
     // Force refresh data
     const utils = trpc.useContext()
 
     // client side data fetching
+    // Get goals
     const { data: goals, isLoading } = trpc.getUserGoals.useQuery()
+    // Delete goal 
     const { mutate: deletUserGoal } = trpc.deleteUserGoal.useMutation({
         onSuccess: () => {
             utils.getUserGoals.invalidate()
-        }
+        },
+        onMutate({ id }) {
+            setCurrentlyDeletingGoal(id)
+        },
+        onSettled() {
+            setCurrentlyDeletingGoal(null)
+        },
     })
 
     return (
@@ -59,7 +70,10 @@ const Dashboard = () => {
                                     onClick={() =>
                                         deletUserGoal({ id: goal.id })}
                                     className="w-full" variant="destructive" size="sm">
-                                    <Trash className="h-4 w-4" />
+                                    {currentlyDeletingGoal === goal.id ? ( // Spin loader while deleting
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) :
+                                        <Trash className="h-4 w-4" />}
                                 </Button>
                             </div>
                         </li>

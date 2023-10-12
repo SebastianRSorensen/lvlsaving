@@ -68,6 +68,39 @@ export const appRouter = router({
         })
         return goal // return deleted goal, dont need it at frontend but good for testing
     }),
+
+    getGoal: privateProcedure.input(z.object({ goalId: z.string() })
+    ).mutation(async ({ ctx, input }) => {
+        const { userId } = ctx
+
+        const goal = await db.savingGoal.findFirst({
+            where: {
+                id: input.goalId,
+                userId,
+            }
+        })
+        if (!goal) {
+            throw new TRPCError({ code: 'NOT_FOUND' })
+        }
+
+        return goal
+    }),
+
+
+
+    // getGoalUploadStatus: privateProcedure.input(z.object({ goalId: z.string() }))
+    //     .query(async ({ ctx, input }) => {
+    //         const goal = await db.savingGoal.findFirst({
+    //             where: {
+    //                 id: input.goalId,
+    //                 userId: ctx.userId,
+    //             },
+    //         })
+
+    //         if (!goal) return { status: 'PENDING' as const }
+
+    //         return { status: goal.addGoalStatus }
+    //     }),
 });
 
 // Export type router type signature,
