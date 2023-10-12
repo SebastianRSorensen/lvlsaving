@@ -1,7 +1,8 @@
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
-import { publicProcedure, router } from './trpc';
+import { privateProcedure, publicProcedure, router } from './trpc';
 import { TRPCError } from '@trpc/server';
 import { db } from '../db';
+import { z } from 'zod';
 
 export const appRouter = router({
     // publicProcedure.query    -> for get requests
@@ -22,7 +23,7 @@ export const appRouter = router({
             },
         })
 
-        // Create user if not exists
+        // Add user to db if not exists
         if (!dbUser) {
             await db.user.create({
                 data: {
@@ -35,7 +36,38 @@ export const appRouter = router({
 
 
         return { success: true }
-    })
+    }),
+    getUserGoals: privateProcedure.query(async ({ ctx }) => {
+        const { userId } = ctx
+
+        return await db.savingGoal.findMany({
+            where: {
+                userId
+            }
+        })
+    }),
+    deleteUserGoal: privateProcedure.input(z.object({ id: z.string() })
+    ).mutation(async ({ ctx, input }) => {
+        const { userId } = ctx
+
+        const goal = await db.savingGoal.findFirst({
+            where: {
+                id: input.id,
+                userId,
+            }
+        })
+        if (!goal) {
+            throw new TRPCError({ code: 'NOT_FOUND' })
+        }
+
+        await db.savingGoal.delete({
+            where: {
+                id: input.id,
+                userId,
+            },
+        })
+        return goal // return deleted goal, dont need it at frontend but good for testing
+    }),
 });
 
 // Export type router type signature,
