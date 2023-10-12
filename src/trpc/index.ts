@@ -37,6 +37,8 @@ export const appRouter = router({
 
         return { success: true }
     }),
+
+    // Get all the users goal
     getUserGoals: privateProcedure.query(async ({ ctx }) => {
         const { userId } = ctx
 
@@ -46,6 +48,26 @@ export const appRouter = router({
             }
         })
     }),
+
+    // Get just the one goal
+    getUserGoal: privateProcedure.input(z.object({ id: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const { userId } = ctx;
+
+            const goal = await db.savingGoal.findFirst({
+                where: {
+                    id: input.id,
+                    userId,
+                }
+            });
+
+            if (!goal) {
+                throw new TRPCError({ code: 'NOT_FOUND' });
+            }
+
+            return goal;
+        }),
+
     deleteUserGoal: privateProcedure.input(z.object({ id: z.string() })
     ).mutation(async ({ ctx, input }) => {
         const { userId } = ctx
@@ -69,38 +91,33 @@ export const appRouter = router({
         return goal // return deleted goal, dont need it at frontend but good for testing
     }),
 
-    getGoal: privateProcedure.input(z.object({ goalId: z.string() })
-    ).mutation(async ({ ctx, input }) => {
-        const { userId } = ctx
 
-        const goal = await db.savingGoal.findFirst({
-            where: {
-                id: input.goalId,
-                userId,
+    transferOnUserGoal: privateProcedure.input(
+        z.object({
+            id: z.string(),
+            amount: z.number(), // Include amount in the schema
+        })).mutation(async ({ ctx, input }) => {
+            const { userId } = ctx;
+
+            const goal = await db.savingGoal.update({
+                where: {
+                    id: input.id,
+                    userId,
+                },
+                data: {
+                    currentAmount: {
+                        increment: input.amount, // Use Prisma's increment feature
+                    },
+                },
+            });
+
+            if (!goal) {
+                throw new TRPCError({ code: 'NOT_FOUND' });
             }
-        })
-        if (!goal) {
-            throw new TRPCError({ code: 'NOT_FOUND' })
-        }
 
-        return goal
-    }),
+            return goal;
+        }),
 
-
-
-    // getGoalUploadStatus: privateProcedure.input(z.object({ goalId: z.string() }))
-    //     .query(async ({ ctx, input }) => {
-    //         const goal = await db.savingGoal.findFirst({
-    //             where: {
-    //                 id: input.goalId,
-    //                 userId: ctx.userId,
-    //             },
-    //         })
-
-    //         if (!goal) return { status: 'PENDING' as const }
-
-    //         return { status: goal.addGoalStatus }
-    //     }),
 });
 
 // Export type router type signature,
