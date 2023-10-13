@@ -2,7 +2,7 @@ import GoalRenderer from "@/components/GoalRenderer"
 import { db } from "@/db"
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
 import { notFound, redirect } from "next/navigation"
-import ChatWrapper from "@/components/ChatWrapper"
+import ChatWrapper from "@/components/chat/ChatWrapper"
 
 interface PageProps {
     params: {
@@ -50,7 +50,7 @@ const page = async ({ params }: PageProps) => {
                 </div>
                 <div className="shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0">
                     {/* Right side */}
-                    <ChatWrapper />
+                    <ChatWrapper goalId={goal.id} />
                 </div>
             </div>
         </div >
