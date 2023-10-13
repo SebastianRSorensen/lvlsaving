@@ -4,9 +4,16 @@ import { TRPCError } from '@trpc/server';
 import { db } from '../db';
 import { z } from 'zod';
 
+const CreateSavingGoalInput = z.object({
+    name: z.string(),
+    age: z.number(),
+});
+
 export const appRouter = router({
     // publicProcedure.query    -> for get requests
     // publicProcedure.mutation -> for post/patch/delete requests (modifying data)
+
+
 
     authCallback: publicProcedure.query(async () => {
         const { getUser } = getKindeServerSession()
@@ -51,7 +58,7 @@ export const appRouter = router({
 
     // Get just the one goal
     getUserGoal: privateProcedure.input(z.object({ id: z.string() }))
-        .query(async ({ ctx, input }) => {
+        .mutation(async ({ ctx, input }) => { //.query -> for get requests to GoalRenderer
             const { userId } = ctx;
 
             const goal = await db.savingGoal.findFirst({
@@ -131,6 +138,34 @@ export const appRouter = router({
 
             return updatedGoal;
         }),
+
+    createSavingGoal: privateProcedure.input(
+        z.object({
+            name: z.string(),
+            goalAmount: z.number(),
+        })
+    ).mutation(async ({ ctx, input }) => {
+        const { userId } = ctx;
+
+        // Ensure the withdrawal amount doesn't exceed the currentAmount
+        if (input.goalAmount <= 0) {
+            throw new TRPCError({ code: 'BAD_REQUEST', message: 'Goal amount is below or equal to 0.' });
+        }
+
+        const newGoal = await db.savingGoal.create({
+            data: {
+                name: input.name,
+                goalAmount: input.goalAmount,
+                userId,
+            },
+        });
+
+        return newGoal;
+    }),
+
+
+
+
 
 
 });
