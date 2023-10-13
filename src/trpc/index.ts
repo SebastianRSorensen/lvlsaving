@@ -3,6 +3,9 @@ import { privateProcedure, publicProcedure, router } from './trpc';
 import { TRPCError } from '@trpc/server';
 import { db } from '../db';
 import { z } from 'zod';
+import { INFINITE_QUERY_LIMIT } from '@/config/infinite-config';
+
+// Backend schema for the db
 
 const CreateSavingGoalInput = z.object({
     name: z.string(),
@@ -164,7 +167,58 @@ export const appRouter = router({
     }),
 
 
+    // Get the messages
+    getGoalmessages: privateProcedure.input
+        (z.object({
+            limit: z.number().min(1).max(100).nullish(),
+            cursor: z.string().nullish(),
+            goalId: z.string()
+        })).
+        query(async ({ ctx, input }) => {
+            const { userId } = ctx
+            const { cursor, goalId } = input
+            const limit = input.limit ?? INFINITE_QUERY_LIMIT
 
+            const file = await db.savingGoal.findFirst({
+                where: {
+                    id: goalId,
+                    userId,
+                },
+            })
+            if (!file) {
+                throw new TRPCError({ code: 'NOT_FOUND' })
+            }
+
+            const messages = await db.message.findMany({
+                where: {
+                    savingGoalId: goalId,
+                },
+                orderBy: {
+                    createdAt: "desc",
+                },
+                take: limit + 1, // +1 for cursor to get the next x-number of messages ready
+                cursor: cursor ? {
+                    id: cursor,
+                } : undefined,
+                select: {
+                    id: true,
+                    text: true,
+                    isUserMessage: true,
+                    createdAt: true,
+                }
+            })
+
+            let nextCursor: typeof cursor | undefined = undefined
+            if (messages.length > limit) {
+                const nextItem = messages.pop()
+                nextCursor = nextItem?.id
+            }
+
+            return {
+                messages,
+                nextCursor,
+            }
+        })
 
 
 
