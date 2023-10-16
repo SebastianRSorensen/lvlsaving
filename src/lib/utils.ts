@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx"
+import { Metadata } from "next"
 import { twMerge } from "tailwind-merge"
 
 
@@ -16,4 +17,42 @@ export function absoluteUrl(path: string) {
     return `https://${process.env.VERCEL_URL}${path}`
   return `http://localhost:${process.env.PORT ?? 3000
     }${path}`
+}
+
+export function constructMetadata({
+  title = "Moneybot - make saving fun",
+  description = "Moneybot is a chatbot that helps you save money and reach your goals",
+  image = "/thumbnail.png",
+  icons = "/favicon.ico",
+  noIndex = false,
+
+}: {
+  title?: string
+  description?: string
+  image?: string
+  icons?: string
+  noIndex?: boolean
+} = {}): Metadata {
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: image
+        }
+      ]
+    },
+    icons,
+    metadataBase: new URL('https://lvlsaving.vercel.app'),
+    themeColor: '#FFF',
+    ...(noIndex && {
+      robots: {
+        index: false,
+        follow: false
+      }
+    })
+  }
 }
