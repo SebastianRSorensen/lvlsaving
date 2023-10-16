@@ -18,7 +18,7 @@ export const POST = async (req: NextRequest) => {
     const { id: userId } = user
 
     if (!userId) {
-        new Response('Unauthorized', { status: 401 })
+        return new Response('Unauthorized', { status: 401 })
     }
 
     const { goalId, message } = SendMessageValidator.parse(body)
@@ -64,6 +64,8 @@ export const POST = async (req: NextRequest) => {
         role: msg.isUserMessage ? "user" as const : "bot" as const,
         content: msg.text,
     }))
+    console.log(formattedPrevMessages);
+
 
     // Get AI response
     const response = await openai.chat.completions.create({
