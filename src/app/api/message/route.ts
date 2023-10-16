@@ -18,12 +18,7 @@ export const POST = async (req: NextRequest) => {
     const { id: userId } = user
 
     if (!userId) {
-        return {
-            status: 401,
-            body: {
-                error: "Unauthorized"
-            }
-        }
+        new Response('Unauthorized', { status: 401 })
     }
 
     const { goalId, message } = SendMessageValidator.parse(body)
@@ -36,12 +31,7 @@ export const POST = async (req: NextRequest) => {
     })
 
     if (!goal) {
-        return {
-            status: 404,
-            body: {
-                error: "Goal not found"
-            }
-        }
+        return new Response('Not found', { status: 404 })
     }
 
     await db.message.create({
