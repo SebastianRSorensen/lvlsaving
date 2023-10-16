@@ -1,8 +1,11 @@
 // Not an actual component
 
-import React, { useState, createContext } from 'react'
+import React, { useState, createContext, useRef } from 'react'
 import { useToast } from '../ui/use-toast'
 import { useMutation } from '@tanstack/react-query'
+import { trpc } from '@/app/_trpc/client'
+import { INFINITE_QUERY_LIMIT } from '@/config/infinite-config'
+import { describe } from 'node:test'
 
 
 type StreamResponse = {
@@ -34,7 +37,12 @@ export const ChatProvider = ({ goalId, children }: ChatProviderProps) => {
     const [message, setMessage] = useState<string>("")
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
+    const utils = trpc.useContext()
+    const backupMessage = useRef<string>("")
+
     const { toast } = useToast()
+
+
 
 
     // Do not use tRPC here because we want to stream data
@@ -54,6 +62,146 @@ export const ChatProvider = ({ goalId, children }: ChatProviderProps) => {
 
             return response.body
         },
+
+        onMutate: async ({ message }) => {
+            backupMessage.current = message
+            setMessage("")
+
+            // Part 1: Optimistic update
+            await utils.getGoalmessages.cancel()
+
+            // Part 2: Get the previous messages
+            const previousMessages = utils.getGoalmessages.getInfiniteData()
+
+            // Part 3: 
+            utils.getGoalmessages.setInfiniteData({
+                goalId, limit: INFINITE_QUERY_LIMIT
+            },
+                (old) => {
+                    if (!old) {
+                        return {
+                            pages: [],
+                            pageParams: [],
+                        }
+                    }
+                    let newPages = [...old.pages]
+                    let latestPage = newPages[0]! // We know this exists therefore the "!"
+                    latestPage.messages = [
+                        {
+                            createdAt: new Date().toISOString(),
+                            id: crypto.randomUUID(),
+                            text: message,
+                            isUserMessage: true,
+                        },
+                        ...latestPage.messages  // Spread inn all our other messages
+                    ]
+
+                    newPages[0] = latestPage
+
+                    return {
+                        ...old,
+                        pages: newPages
+                    }
+
+
+                })
+            setIsLoading(true)
+
+            return { previousMessages: previousMessages?.pages.flatMap((page) => page.messages) ?? [] }
+        },
+
+        onSuccess: async (stream) => {
+            setIsLoading(false)
+
+            if (!stream) {
+                return toast({
+                    title: "Failed to send message",
+                    description: "Please refresh the page and try again",
+                    variant: "destructive"
+                })
+            }
+            const reader = stream.getReader()
+            const decoder = new TextDecoder()
+            let done = false
+
+            // accumulated response
+            let accResponse = ""
+            while (!done) {
+                const { value, done: isDone } = await reader.read()
+                done = isDone
+                const chunkValue = decoder.decode(value) // The actual message from the AI
+                accResponse += chunkValue
+
+
+                // append chunk to response
+                utils.getGoalmessages.setInfiniteData(
+                    { goalId, limit: INFINITE_QUERY_LIMIT },
+                    (old) => {
+                        if (!old) {
+                            return {
+                                pages: [],
+                                pageParams: [],
+                            }
+                        }
+                        let isAIResponseCreated = old.pages.some(
+                            (page) => page.messages.some((message) =>
+                                message.id === "ai-response"))
+
+                        let updatePages = old.pages.map((page) => {
+                            if (page === old.pages[0]) {
+                                let updatedMessages
+
+                                if (!isAIResponseCreated) {
+                                    updatedMessages = [
+                                        {
+                                            createdAt: new Date().toISOString(),
+                                            id: "ai-response",
+                                            text: accResponse,
+                                            isUserMessage: false,
+                                        },
+                                        ...page.messages
+                                    ]
+                                } else {
+                                    updatedMessages = page.messages.map((message) => {
+                                        if (message.id === "ai-response") {
+                                            return {
+                                                ...message,
+                                                text: accResponse
+                                            }
+                                        }
+                                        return message
+                                    })
+                                }
+                                return {
+                                    ...page,
+                                    messages: updatedMessages
+                                }
+
+                            }
+                            return page
+                        })
+                        return {
+                            ...old,
+                            pages: updatePages
+                        }
+                    }
+                )
+            }
+        },
+
+        onError: (_, __, context) => {
+            setMessage(backupMessage.current)
+            utils.getGoalmessages.setData(
+                { goalId },
+                { messages: context?.previousMessages ?? [] }
+            )
+        },
+
+        onSettled: async () => {
+            setIsLoading(false)
+
+            await utils.getGoalmessages.invalidate({ goalId })
+        }
 
     })
 
