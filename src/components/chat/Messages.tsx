@@ -3,12 +3,17 @@ import { INFINITE_QUERY_LIMIT } from '@/config/infinite-config'
 import { Loader2, MessageSquare } from 'lucide-react'
 import Skeleton from 'react-loading-skeleton'
 import Message from './Message'
+import { useContext } from 'react'
+import { ChatContext } from './ChatContext'
 
 interface MessagesProps {
     goalId: string
 }
 
 const Messages = ({ goalId }: MessagesProps) => {
+
+    const { isLoading: isAIThinking } = useContext(ChatContext)
+
     const { data, isLoading, fetchNextPage } = trpc.getGoalmessages.useInfiniteQuery({
         goalId: goalId,
         limit: INFINITE_QUERY_LIMIT,
@@ -27,7 +32,7 @@ const Messages = ({ goalId }: MessagesProps) => {
     }
 
     const combinedMessages = [
-        ...(true ? [loadingMessage] : []),
+        ...(isAIThinking ? [loadingMessage] : []),
         ...(messages ?? [])
     ]
 
