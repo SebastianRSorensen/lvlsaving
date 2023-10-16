@@ -3,6 +3,7 @@ import { ExtendedMessage } from "@/types/message";
 import { Icons } from "../Icons";
 import ReactMarkdown from "react-markdown";
 import { format } from 'date-fns'
+import { forwardRef } from "react";
 
 interface MessageProps {
     message: ExtendedMessage
@@ -10,10 +11,11 @@ interface MessageProps {
 
 }
 
-const Message = ({ message, isNextMessageSameSender }: MessageProps) => {
+const Message = forwardRef<HTMLDivElement, MessageProps>(({ message, isNextMessageSameSender }, ref) => {
     return (
-        <div className={cn("flex items-end",
-            { "justify-end": message.isUserMessage, })}>
+        <div ref={ref}
+            className={cn("flex items-end",
+                { "justify-end": message.isUserMessage, })}>
             <div className={cn("relative flex h-6 w-6 aspect-square items-center justify-center", {
                 "order-2 bg-blue-600 rounded-sm": message.isUserMessage,
                 "order-1 bg-zinc-800 rounded-sm": !message.isUserMessage,
@@ -67,5 +69,6 @@ const Message = ({ message, isNextMessageSameSender }: MessageProps) => {
         </div>
     )
 }
+)
 
 export default Message
