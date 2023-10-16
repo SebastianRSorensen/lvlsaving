@@ -1,20 +1,8 @@
-## Getting Started
+## Task description
+I decided to make a fullstack application where you can sign up, add saving goals, and chat to a chatbot about how you can reach your goals.
 
-First, run the development server:
+## How to run
+Enter https://www.funsavings.no to run the application on your web browser. 
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-## Installed packages:
-
-```bash
-npx prisma init
-
-```
+## Comments
+I have used planetscale to host the database, prisma and trpc for backend communication, Kinde as authenticator, and Vercel to deploy the application. 
