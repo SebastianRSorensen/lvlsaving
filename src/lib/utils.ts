@@ -46,7 +46,7 @@ export function constructMetadata({
       ]
     },
     icons,
-    metadataBase: new URL('https://lvlsaving.vercel.app'),
+    metadataBase: new URL('https://www.funsavings.no/'),
     themeColor: '#FFF',
     ...(noIndex && {
       robots: {
