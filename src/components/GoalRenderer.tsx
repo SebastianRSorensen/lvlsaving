@@ -17,17 +17,13 @@ interface GoalRendererProps {
         name: string;
         goalAmount: number;
         currentAmount: number;
-        addGoalStatus: $Enums.AddGoalStatus;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string | null;
-    } | null;
+    };
 }
 
 const GoalRenderer: React.FC<GoalRendererProps> = ({ goalData }) => {
-    if (!goalData) {
-        return <div>No goal data available</div>;
-    }
+
+
+
 
     const { mutate: fetchGoal, data: goal } = trpc.getUserGoal.useMutation();
     const [error, setError] = useState<string | null>(null);
@@ -73,8 +69,10 @@ const GoalRenderer: React.FC<GoalRendererProps> = ({ goalData }) => {
         );
     };
 
+
     // Force refresh data
     const utils = trpc.useContext();
+
 
     // transfer on goal 
     const transferMutation = trpc.transferOnUserGoal.useMutation({
@@ -94,6 +92,7 @@ const GoalRenderer: React.FC<GoalRendererProps> = ({ goalData }) => {
     useEffect(() => {
         fetchGoal({ id: goalData.id });
     }, [goalData.id, fetchGoal]);
+
     // Use effect to clear response message after a certain duration
     useEffect(() => {
         if (responseMessage) {
@@ -104,6 +103,10 @@ const GoalRenderer: React.FC<GoalRendererProps> = ({ goalData }) => {
             return () => clearTimeout(timer);
         }
     }, [responseMessage]);
+
+    if (!goalData) {
+        return <div>No goal data available</div>;
+    }
 
     if (!goal) {
         return <div>Loading...</div>;
