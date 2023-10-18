@@ -4,7 +4,6 @@ import { get } from 'http';
 
 /**
  * Initialization of tRPC backend
- * Should be done only once per backend!
  */
 const t = initTRPC.create();
 const middleware = t.middleware;

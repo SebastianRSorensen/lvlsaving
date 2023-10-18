@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { trpc } from "@/app/_trpc/client";
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import { Button } from './ui/button';
-import { Plus } from 'lucide-react';
+import { Goal, Plus } from 'lucide-react';
+import { sendInitialMessage } from './chat/ChatContext';
 
 const AddGoalButton = () => {
     // Force refresh data
@@ -11,11 +12,14 @@ const AddGoalButton = () => {
     const [name, setName] = useState('');
     const [goalAmount, setGoalAmount] = useState('');
     const { mutate: createSavingGoal } = trpc.createSavingGoal.useMutation({
-        onSuccess: () => {
+        onSuccess: (newGoal) => {
             utils.getUserGoals.invalidate()
             setIsOpen(false);
             setName('');
             setGoalAmount('');
+            // Send default message to OpenAI
+            // const defaultMessage = `I am trying to save for ${name}, it costs ${goalAmount}. Can you help me make a saving plan to make this goal come true? I will not provide any more information about my goal so you will have to make the plan with what ive sent you now.`;
+            // sendInitialMessage(defaultMessage, newGoal.id);
         },
         onError: (error) => {
             console.error(error.message);

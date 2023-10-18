@@ -124,7 +124,6 @@ const GoalRenderer: React.FC<GoalRendererProps> = ({ goalData }) => {
 
     return (
         <main className="mx-auto max-w-7xl md:p-10">
-            {/* Sjekk sikkerheten til linken. Kan den nås av feil person? */}
             <Link
                 href='/dashboard'
                 className='flex z-40 font-semibold'>

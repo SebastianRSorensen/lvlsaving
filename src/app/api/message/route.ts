@@ -2,7 +2,6 @@ import { db } from "@/db";
 import { SendMessageValidator } from "@/lib/validators/SendMessageValidator";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { NextRequest } from "next/server";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { openai } from "@/lib/openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 
@@ -43,18 +42,13 @@ export const POST = async (req: NextRequest) => {
         },
     })
 
-    // AI PART
-    const embeddings = new OpenAIEmbeddings({
-        openAIApiKey: process.env.OPENAI_API_KEY,
-    })
-
-    // Use "take: x" last messages sendt by user for context
+    // Use "take: x" last messages as context for AI
     const prevMessages = await db.message.findMany({
         where: {
             savingGoalId: goalId,
         },
         orderBy: {
-            createdAt: "asc",
+            createdAt: "desc",
         },
         take: 7,
     })
@@ -64,46 +58,42 @@ export const POST = async (req: NextRequest) => {
         role: msg.isUserMessage ? "user" as const : "bot" as const,
         content: msg.text,
     }))
-    console.log(formattedPrevMessages);
+    // console.log(formattedPrevMessages); // debug
 
 
     // Get AI response
     const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        temperature: 0,
+        temperature: 0, // 0 = deterministic, higher = more random (2 is max)
         stream: true,
         // to send prev messages as context
         messages: [
             {
                 role: 'system',
                 content:
-                    'Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format.',
+                    'Use the following previous conversaton (if there is any) to answer the users question in markdown format.',
             },
             {
                 role: 'user',
-                content: `Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.
-                  
-            \n----------------\n
-            
-            PREVIOUS CONVERSATION:
-            ${formattedPrevMessages.map((message) => {
+                content: `Use the following previous conversaton (if there is any) to answer the my question in markdown format. \nIf you don't know the answer I want you to try your best to guess what it is.
+
+                \n----------------\n
+
+                PREVIOUS CONVERSATION:
+                ${formattedPrevMessages.map((message) => {
                     if (message.role === 'user') return `User: ${message.content}\n`
                     return `Assistant: ${message.content}\n`
                 })}
-            
-            \n----------------\n
-            
-            CONTEXT:
-            Not added yet
+
+                \n----------------\n
 
 
-            USER INPUT: ${message}`,
+                USER INPUT: ${message}`,
             },
         ],
     })
 
     // Get AI response as text (streamed), also the reason we cant use custom tRPC response
-
     const stream = OpenAIStream(response, {
         async onCompletion(completion) {
             await db.message.create({

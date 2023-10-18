@@ -32,6 +32,24 @@ interface ChatProviderProps {
     children: React.ReactNode
 
 }
+
+// For implementing an initial message to the AI in the future
+export const sendInitialMessage = async (initialMessage: string, goalId: string) => {
+    const response = await fetch(`/api/message`, {
+        method: 'POST',
+        body: JSON.stringify({
+            goalId: goalId,
+            message: initialMessage
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to send initial message");
+    }
+
+    return response.body;
+};
+
 export const ChatProvider = ({ goalId, children }: ChatProviderProps) => {
 
     const [message, setMessage] = useState<string>("")

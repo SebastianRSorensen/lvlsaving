@@ -13,9 +13,6 @@ const CreateSavingGoalInput = z.object({
 });
 
 export const appRouter = router({
-    // publicProcedure.query    -> for get requests
-    // publicProcedure.mutation -> for post/patch/delete requests (modifying data)
-
 
 
     authCallback: publicProcedure.query(async () => {
@@ -61,7 +58,7 @@ export const appRouter = router({
 
     // Get just the one goal
     getUserGoal: privateProcedure.input(z.object({ id: z.string() }))
-        .mutation(async ({ ctx, input }) => { //.query -> for get requests to GoalRenderer
+        .mutation(async ({ ctx, input }) => {
             const { userId } = ctx;
 
             const goal = await db.savingGoal.findFirst({
