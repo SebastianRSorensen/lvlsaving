@@ -3,7 +3,7 @@ import { trpc } from "@/app/_trpc/client";
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import { Button } from './ui/button';
 import { Goal, Plus } from 'lucide-react';
-import { sendInitialMessage } from './chat/ChatContext';
+// import { sendInitialMessage } from './chat/ChatContext';
 
 const AddGoalButton = () => {
     // Force refresh data

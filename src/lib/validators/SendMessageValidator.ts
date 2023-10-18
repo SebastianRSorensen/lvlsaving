@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
 export const SendMessageValidator = z.object({
-    goalId: z.string(),
+    savingGoalId: z.string(),
     message: z.string(),
 });

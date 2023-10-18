@@ -28,29 +28,29 @@ export const ChatContext = createContext<StreamResponse>({
 })
 
 interface ChatProviderProps {
-    goalId: string
+    savingGoalId: string
     children: React.ReactNode
 
 }
 
 // For implementing an initial message to the AI in the future
-export const sendInitialMessage = async (initialMessage: string, goalId: string) => {
-    const response = await fetch(`/api/message`, {
-        method: 'POST',
-        body: JSON.stringify({
-            goalId: goalId,
-            message: initialMessage
-        })
-    });
+// export const sendInitialMessage = async (initialMessage: string, savingGoalId: string) => {
+//     const response = await fetch(`/api/message`, {
+//         method: 'POST',
+//         body: JSON.stringify({
+//             savingGoalId,
+//             message: initialMessage
+//         })
+//     });
 
-    if (!response.ok) {
-        throw new Error("Failed to send initial message");
-    }
+//     if (!response.ok) {
+//         throw new Error("Failed to send initial message");
+//     }
 
-    return response.body;
-};
+//     return response.body;
+// };
 
-export const ChatProvider = ({ goalId, children }: ChatProviderProps) => {
+export const ChatProvider = ({ savingGoalId, children }: ChatProviderProps) => {
 
     const [message, setMessage] = useState<string>("")
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -69,8 +69,8 @@ export const ChatProvider = ({ goalId, children }: ChatProviderProps) => {
             const response = await fetch(`/api/message`, {
                 method: 'POST',
                 body: JSON.stringify({
-                    goalId: goalId,
-                    message: message
+                    savingGoalId,
+                    message
                 })
             })
 
@@ -93,7 +93,7 @@ export const ChatProvider = ({ goalId, children }: ChatProviderProps) => {
 
             // Part 3: 
             utils.getGoalmessages.setInfiniteData({
-                goalId, limit: INFINITE_QUERY_LIMIT
+                savingGoalId, limit: INFINITE_QUERY_LIMIT
             },
                 (old) => {
                     if (!old) {
@@ -153,7 +153,7 @@ export const ChatProvider = ({ goalId, children }: ChatProviderProps) => {
 
                 // append chunk to response
                 utils.getGoalmessages.setInfiniteData(
-                    { goalId, limit: INFINITE_QUERY_LIMIT },
+                    { savingGoalId, limit: INFINITE_QUERY_LIMIT },
                     (old) => {
                         if (!old) {
                             return {
@@ -210,7 +210,7 @@ export const ChatProvider = ({ goalId, children }: ChatProviderProps) => {
         onError: (_, __, context) => {
             setMessage(backupMessage.current)
             utils.getGoalmessages.setData(
-                { goalId },
+                { savingGoalId },
                 { messages: context?.previousMessages ?? [] }
             )
         },
@@ -218,7 +218,7 @@ export const ChatProvider = ({ goalId, children }: ChatProviderProps) => {
         onSettled: async () => {
             setIsLoading(false)
 
-            await utils.getGoalmessages.invalidate({ goalId })
+            await utils.getGoalmessages.invalidate({ savingGoalId })
         }
 
     })

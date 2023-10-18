@@ -8,15 +8,16 @@ import { ChatContext } from './ChatContext'
 import { useIntersection } from '@mantine/hooks'
 
 interface MessagesProps {
-    goalId: string
+    savingGoalId: string
 }
 
-const Messages = ({ goalId }: MessagesProps) => {
+const Messages = ({ savingGoalId }: MessagesProps) => {
 
     const { isLoading: isAIThinking } = useContext(ChatContext)
 
+    console.log("Using savingGoalId in Messages.tsx:", savingGoalId);
     const { data, isLoading, fetchNextPage } = trpc.getGoalmessages.useInfiniteQuery({
-        goalId: goalId,
+        savingGoalId,
         limit: INFINITE_QUERY_LIMIT,
     }, {
         getNextPageParam: (lastPage) => lastPage?.nextCursor,

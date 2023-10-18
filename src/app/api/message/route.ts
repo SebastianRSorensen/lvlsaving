@@ -20,11 +20,11 @@ export const POST = async (req: NextRequest) => {
         return new Response('Unauthorized', { status: 401 })
     }
 
-    const { goalId, message } = SendMessageValidator.parse(body)
+    const { savingGoalId, message } = SendMessageValidator.parse(body)
 
     const goal = await db.savingGoal.findFirst({
         where: {
-            id: goalId,
+            id: savingGoalId,
             userId
         },
     })
@@ -38,14 +38,14 @@ export const POST = async (req: NextRequest) => {
             text: message,
             isUserMessage: true,
             userId,
-            savingGoalId: goalId,
+            savingGoalId,
         },
     })
 
     // Use "take: x" last messages as context for AI
     const prevMessages = await db.message.findMany({
         where: {
-            savingGoalId: goalId,
+            savingGoalId,
         },
         orderBy: {
             createdAt: "desc",
@@ -100,7 +100,7 @@ export const POST = async (req: NextRequest) => {
                 data: {
                     text: completion,
                     isUserMessage: false,
-                    savingGoalId: goalId,
+                    savingGoalId,
                     userId,
                 },
             })

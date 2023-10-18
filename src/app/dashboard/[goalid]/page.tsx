@@ -50,7 +50,7 @@ const page = async ({ params }: PageProps) => {
                 </div>
                 <div className="shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0">
                     {/* Right side */}
-                    <ChatWrapper goalId={goal.id} />
+                    <ChatWrapper savingGoalId={goal.id} />
                 </div>
             </div>
         </div >

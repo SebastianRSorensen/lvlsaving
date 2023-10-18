@@ -147,7 +147,6 @@ export const appRouter = router({
     ).mutation(async ({ ctx, input }) => {
         const { userId } = ctx;
 
-        // Ensure the withdrawal amount doesn't exceed the currentAmount
         if (input.goalAmount <= 0) {
             throw new TRPCError({ code: 'BAD_REQUEST', message: 'Goal amount is below or equal to 0.' });
         }
@@ -169,31 +168,31 @@ export const appRouter = router({
         (z.object({
             limit: z.number().min(1).max(100).nullish(),
             cursor: z.string().nullish(),
-            goalId: z.string()
+            savingGoalId: z.string()
         })).
         query(async ({ ctx, input }) => {
             const { userId } = ctx
-            const { cursor, goalId } = input
+            const { savingGoalId, cursor } = input
             const limit = input.limit ?? INFINITE_QUERY_LIMIT
 
-            const file = await db.savingGoal.findFirst({
+            const goal = await db.savingGoal.findFirst({
                 where: {
-                    id: goalId,
+                    id: savingGoalId,
                     userId,
                 },
             })
-            if (!file) {
+            if (!goal) {
                 throw new TRPCError({ code: 'NOT_FOUND' })
             }
 
             const messages = await db.message.findMany({
+                take: limit + 1, // +1 for cursor to get the next x-number of messages ready
                 where: {
-                    savingGoalId: goalId,
+                    savingGoalId,
                 },
                 orderBy: {
                     createdAt: "desc",
                 },
-                take: limit + 1, // +1 for cursor to get the next x-number of messages ready
                 cursor: cursor ? {
                     id: cursor,
                 } : undefined,
