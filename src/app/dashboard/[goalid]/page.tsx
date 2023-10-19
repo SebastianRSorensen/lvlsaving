@@ -33,6 +33,7 @@ const page = async ({ params }: PageProps) => {
         },
     })
 
+    // edge case if goal is not found
     if (!goal) {
         notFound()
     }

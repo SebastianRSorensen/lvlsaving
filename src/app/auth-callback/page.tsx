@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react"
 const Page = () => {
     const router = useRouter()
 
+    // Get origin from url
     const searchParams = useSearchParams()
     const origin = searchParams.get("origin")
 

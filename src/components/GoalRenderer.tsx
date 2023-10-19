@@ -19,11 +19,10 @@ interface GoalRendererProps {
         currentAmount: number;
     };
 }
-
+// Var nok ikke nødvendig å legge til React.FC
+// men gjør det tydelig at dette er en React-funksjonskomponent
+// som tar inn GoalRendererProps som props
 const GoalRenderer: React.FC<GoalRendererProps> = ({ goalData }) => {
-
-
-
 
     const { mutate: fetchGoal, data: goal } = trpc.getUserGoal.useMutation();
     const [error, setError] = useState<string | null>(null);

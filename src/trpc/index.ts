@@ -76,6 +76,7 @@ export const appRouter = router({
         }),
 
     deleteUserGoal: privateProcedure.input(z.object({ id: z.string() })
+        // Bruker z for a verifisere at id er en string under runtime
     ).mutation(async ({ ctx, input }) => {
         const { userId } = ctx
 
@@ -166,6 +167,9 @@ export const appRouter = router({
     // Get the messages
     getGoalmessages: privateProcedure.input
         (z.object({
+            // The limit property should be a number.
+            // The number should be a minimum of 1 and a maximum of 100.
+            // The .nullish() method indicates that null and undefined are also acceptable values for this property.
             limit: z.number().min(1).max(100).nullish(),
             cursor: z.string().nullish(),
             savingGoalId: z.string()
@@ -204,6 +208,11 @@ export const appRouter = router({
                 }
             })
 
+            //If there are more messages than the limit, it provides a "cursor" 
+            // pointing to the next item (based on its id). 
+            // This "cursor" can then be used in subsequent requests to fetch the next 
+            // set of messages starting from that point. 
+            // This is a common pattern in paginated APIs.
             let nextCursor: typeof cursor | undefined = undefined
             if (messages.length > limit) {
                 const nextItem = messages.pop()

@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 
+// Kopiert inn og er bare en initialisering av prisma
+// slikt av vi kan accesse db fra alle steder i koden
 declare global {
-    // eslint-disable-next-line no-var
     var cachedPrisma: PrismaClient
 }
 

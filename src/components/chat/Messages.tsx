@@ -33,6 +33,11 @@ const Messages = ({ savingGoalId }: MessagesProps) => {
         isUserMessage: false,
     }
 
+    //     For eksempel, hvis:
+    // isAIThinking er true
+    // loadingMessage er "Loading..."
+    // messages er ["Hello", "World"]
+    // Vil combinedMessages bli: ["Loading...", "Hello", "World"].
     const combinedMessages = [
         ...(isAIThinking ? [loadingMessage] : []),
         ...(messages ?? [])

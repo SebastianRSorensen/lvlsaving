@@ -22,6 +22,7 @@ export default function Home() {
           Set up a savings goal and the MoneyBot will help you reach it!
         </p>
 
+        {/* Skulle ha vært en Register Link */}
         <Link className={buttonVariants({
           size: "lg",
           className: "mt-5"

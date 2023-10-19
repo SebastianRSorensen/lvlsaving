@@ -30,5 +30,5 @@ const isAuth = middleware(async (opts) => {
  * that can be used throughout the router
  */
 export const router = t.router;
-export const publicProcedure = t.procedure;
-export const privateProcedure = t.procedure.use(isAuth);
+export const publicProcedure = t.procedure; // Alle kan kalle denne
+export const privateProcedure = t.procedure.use(isAuth); // Må være logget inn for å kalle denne
